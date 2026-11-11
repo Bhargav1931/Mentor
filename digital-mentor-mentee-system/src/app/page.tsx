@@ -48,10 +48,6 @@ export default async function HomePage() {
           <p className="mt-5 text-lg text-slate-600">
             MentorBridge connects mentees with experienced mentors. Match, set goals, meet, message and measure progress — all in one place.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/register?role=mentee" className="btn-primary px-6 py-3 text-base">I want a mentor</Link>
-            <Link href="/register?role=mentor" className="btn-secondary px-6 py-3 text-base">I want to mentor</Link>
-          </div>
           <div className="mt-10 flex gap-10">
             {[
               [mentorCount.c, "Mentors"],
