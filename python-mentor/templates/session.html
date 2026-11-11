@@ -1,0 +1,1 @@
+<article><h3>{{ session.title }}</h3><span class="badge">{{ session.status }}</span><p>{{ session.scheduled_at|date:'D, d M Y H:i T' }} · {{ session.duration_min }} minutes</p><p>{{ session.mentorship.mentor.name }} &amp; {{ session.mentorship.mentee.name }}</p><a href="{% url 'workspace' session.mentorship_id %}#sessions">View session →</a></article>
