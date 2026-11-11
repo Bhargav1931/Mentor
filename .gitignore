@@ -2,3 +2,9 @@ node_modules/
 .next/
 .env*
 *.tsbuildinfo
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+staticfiles/
+MentorBridge-project.zip
