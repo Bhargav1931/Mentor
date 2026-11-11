@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { loginAction } from "@/lib/actions";
-import { StateForm, SubmitButton, DemoFill } from "@/components/forms";
+import { StateForm, SubmitButton } from "@/components/forms";
 import { Logo } from "@/components/Logo";
 
 export const dynamic = "force-dynamic";
@@ -31,15 +31,7 @@ export default async function LoginPage() {
             New here? <Link href="/register" className="font-semibold text-indigo-600">Create an account</Link>
           </p>
         </div>
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-xs font-semibold uppercase text-slate-500">Demo accounts (password: password123) — click to fill</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <DemoFill email="priya@mentor.dev" />
-            <DemoFill email="daniel@mentor.dev" />
-            <DemoFill email="aarav@mentee.dev" />
-            <DemoFill email="sofia@mentee.dev" />
-          </div>
-        </div>
+
       </div>
     </main>
   );

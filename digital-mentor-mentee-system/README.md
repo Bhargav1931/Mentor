@@ -11,11 +11,28 @@ A full-stack mentoring platform built with **Next.js (App Router)**, **PostgreSQ
   session scheduling with meeting links + notes, two-way feedback & ratings
 - Dashboard with stats, upcoming sessions and goal progress
 
-Database tables are created **automatically** on first request and demo data is seeded
-when the database is empty.
+- Members directory and mentor-only member creation (mentor / mentee accounts)
+- Schedule page with upcoming and past sessions across your mentorships
+- Chat navigation with private conversations for active mentorships and completed history
 
-Demo accounts (password `password123`): `priya@mentor.dev`, `daniel@mentor.dev`,
-`aarav@mentee.dev`, `sofia@mentee.dev`.
+Database tables are created **automatically** on first request. No demo accounts are
+seeded. Register your own account to get started. Mentors can add members from
+**Members**; mentees can self-register. Creating a member does not automatically
+start a mentorship: send and accept a request before scheduling sessions or chatting.
+
+Existing installations run a one-time transactional cleanup of the four old demo
+mentor emails, only when their password still matches the original demo password.
+Related demo mentorship records are removed by foreign-key cascade. Other accounts
+are preserved. Back up your database before upgrading if you need that demo history.
+The cleanup runs on the first database-backed request after deployment.
+
+## Validation
+```bash
+npm run typecheck
+npm run lint
+```
+A PostgreSQL database configured through `DATABASE_URL` is required to exercise
+registration, member creation, mentorship requests, scheduling and messaging.
 
 ## Deploy to Vercel
 1. Push this project to a GitHub repository.

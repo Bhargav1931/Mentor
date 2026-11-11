@@ -227,6 +227,7 @@ export async function scheduleMeetingAction(f: FormData) {
   });
   revalidatePath(`/mentorships/${id}`);
   revalidatePath("/dashboard");
+  revalidatePath("/schedule");
 }
 
 export async function updateMeetingAction(f: FormData) {
@@ -242,6 +243,7 @@ export async function updateMeetingAction(f: FormData) {
   if (Object.keys(patch).length) await db.update(meetings).set(patch).where(eq(meetings.id, meetingId));
   revalidatePath(`/mentorships/${mt.mentorshipId}`);
   revalidatePath("/dashboard");
+  revalidatePath("/schedule");
 }
 
 /* ---------------- Feedback ---------------- */
@@ -264,4 +266,25 @@ export async function submitFeedbackAction(f: FormData) {
     await db.insert(feedback).values({ mentorshipId: id, fromUserId: user.id, toUserId, rating, comment: str(f, "comment") });
   }
   revalidatePath(`/mentorships/${id}`);
+}
+
+/* ---------------- Members ---------------- */
+export async function addMemberAction(_: FormState, f: FormData): Promise<FormState> {
+  const actor = await requireUser();
+  if (actor.role !== "mentor") return { error: "Only mentors can add members. New members can also register themselves." };
+  const name = str(f, "name");
+  const email = str(f, "email").toLowerCase();
+  const password = str(f, "password");
+  const role = str(f, "role");
+  if (!name || name.length > 120) return { error: "Enter a name of up to 120 characters." };
+  if (email.length > 200 || !/^\S+@\S+\.\S+$/.test(email)) return { error: "Enter a valid email address." };
+  if (password.length < 8) return { error: "Use a password of at least 8 characters." };
+  if (!["mentor", "mentee"].includes(role)) return { error: "Choose a member role." };
+  const added = await db.insert(users).values({ name, email, role, passwordHash: hashPassword(password),
+    headline: str(f, "headline").slice(0, 200), availability: str(f, "availability").slice(0, 200),
+  }).onConflictDoNothing({ target: users.email }).returning({ id: users.id });
+  if (!added.length) return { error: "An account with this email already exists." };
+  revalidatePath("/members");
+  revalidatePath("/mentors");
+  return { ok: "Member added. They can log in with the email and password you provided." };
 }

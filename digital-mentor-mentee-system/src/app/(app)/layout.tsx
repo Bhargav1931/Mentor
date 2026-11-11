@@ -25,6 +25,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   const links = [
     { href: "/dashboard", label: "Dashboard" },
+    { href: "/members", label: "Members" },
+    { href: "/schedule", label: "Schedule" },
+    { href: "/chat", label: "Chat" },
     ...(user.role === "mentee" ? [{ href: "/mentors", label: "Find Mentors" }] : []),
     { href: "/requests", label: "Requests", badge: user.role === "mentor" ? pending.c : 0 },
     { href: "/mentorships", label: "Mentorships" },
