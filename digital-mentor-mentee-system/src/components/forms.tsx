@@ -55,25 +55,6 @@ export function ResetForm({ action, children, className = "" }: { action: (f: Fo
   );
 }
 
-export function DemoFill({ email }: { email: string }) {
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        const e = document.querySelector<HTMLInputElement>('input[name="email"]');
-        const p = document.querySelector<HTMLInputElement>('input[name="password"]');
-        if (e && p) {
-          e.value = email;
-          p.value = "password123";
-        }
-      }}
-      className="rounded-lg border border-slate-200 px-3 py-2 text-left text-xs hover:border-indigo-300 hover:bg-indigo-50"
-    >
-      {email}
-    </button>
-  );
-}
-
 /** datetime-local input that submits an ISO string (timezone-correct on UTC servers) */
 export function DateTimeInput({ name, required }: { name: string; required?: boolean }) {
   const hidden = useRef<HTMLInputElement>(null);

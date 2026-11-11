@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     ? await db
         .select()
         .from(meetings)
-        .where(and(inArray(meetings.mentorshipId, activeIds), eq(meetings.status, "scheduled"), gte(meetings.scheduledAt, new Date(Date.now() - 3600_000))))
+        .where(and(inArray(meetings.mentorshipId, activeIds), eq(meetings.status, "scheduled"), gte(meetings.scheduledAt, new Date(new Date().getTime() - 3600_000))))
         .orderBy(asc(meetings.scheduledAt))
         .limit(5)
     : [];

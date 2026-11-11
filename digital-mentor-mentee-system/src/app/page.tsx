@@ -69,10 +69,10 @@ export default async function HomePage() {
           <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-indigo-200 via-violet-200 to-sky-200 blur-2xl" />
           <div className="relative space-y-4 rounded-3xl border border-white/60 bg-white/90 p-6 shadow-xl backdrop-blur">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 font-semibold text-white">PS</div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 font-semibold text-white">+</div>
               <div>
-                <p className="font-semibold">Priya Sharma</p>
-                <p className="text-xs text-slate-500">Senior Software Engineer · Mentor</p>
+                <p className="font-semibold">Your mentorship workspace</p>
+                <p className="text-xs text-slate-500">Add members to get started</p>
               </div>
               <span className="ml-auto rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Active</span>
             </div>
@@ -88,7 +88,7 @@ export default async function HomePage() {
               <p className="mt-1 font-medium">Resume review · Thu 6:00 PM</p>
             </div>
             <div className="rounded-xl bg-indigo-600 p-4 text-sm text-white">
-              “Welcome Aarav! Let&apos;s start by reviewing your resume.”
+              Private conversations, shared goals and scheduled sessions.
             </div>
           </div>
         </div>

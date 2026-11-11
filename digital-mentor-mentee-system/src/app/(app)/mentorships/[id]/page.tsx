@@ -60,7 +60,7 @@ export default async function MentorshipPage({
   const pct = goalList.length ? Math.round((done / goalList.length) * 100) : 0;
   const myFeedback = fb.find((f) => f.fromUserId === user.id);
   const theirFeedback = fb.find((f) => f.fromUserId === otherId);
-  const now = Date.now();
+  const now = new Date().getTime();
   const upcoming = meetingList.filter((x) => x.status === "scheduled" && new Date(x.scheduledAt).getTime() >= now - 3600_000).reverse();
   const past = meetingList.filter((x) => !upcoming.includes(x));
 
