@@ -4,9 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight, Bell, BookOpen, CalendarDays, Check, CheckCircle2, ChevronDown,
   ChevronRight, Circle, Clock3, Compass, Goal, LayoutDashboard, Menu, MessageCircle,
-  MoreHorizontal, Plus, Search, Send, Settings, Sparkles, Star, Target, TrendingUp,
-  UserRound, UsersRound, Video, X, Zap
+  MoreHorizontal, Plus, Search, Send, LogOut, Sparkles, Star, Target, TrendingUp,
+  Video, X, Zap
 } from "lucide-react";
+import Auth, { type Account } from "./Auth";
+
+const demoAccount: Account = { name: "Aarav Rao", email: "aarav@mentee.dev", password: "password123", account: "mentee" };
+const getInitials = (name: string) => name.trim().split(/\s+/).map(part => part[0]).join("").slice(0, 2).toUpperCase();
 
 type Page = "Overview" | "Find mentors" | "My mentorship" | "Messages" | "Sessions";
 type GoalItem = { id: number; title: string; due: string; done: boolean };
@@ -42,6 +46,10 @@ function Avatar({ person, small = false }: { person: Mentor | { initials: string
 
 export default function MentorApp() {
   const [page, setPage] = useState<Page>("Overview");
+  const [currentUser, setCurrentUser] = useState<Account | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([demoAccount]);
+  const [mentorList, setMentorList] = useState<Mentor[]>(mentors);
+  const [hydrated, setHydrated] = useState(false);
   const [goals, setGoals] = useState(initialGoals);
   const [sessions, setSessions] = useState(initialSessions);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -60,18 +68,57 @@ export default function MentorApp() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem("mentorbridge-data");
-      if (saved) { const data = JSON.parse(saved); if (data.goals) setGoals(data.goals); if (data.sessions) setSessions(data.sessions); }
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.goals) setGoals(data.goals);
+        if (data.sessions) setSessions(data.sessions);
+        if (data.communityMentors) setMentorList([...mentors, ...data.communityMentors]);
+      }
+      const savedAuth = localStorage.getItem("mentorbridge-auth");
+      if (savedAuth) {
+        const auth = JSON.parse(savedAuth);
+        if (auth.accounts) setAccounts([demoAccount, ...auth.accounts.filter((a: Account) => a.email !== demoAccount.email)]);
+        if (auth.currentUser) setCurrentUser(auth.currentUser);
+      }
     } catch { /* use demo data */ }
+    setHydrated(true);
   }, []);
-  useEffect(() => { localStorage.setItem("mentorbridge-data", JSON.stringify({ goals, sessions })); }, [goals, sessions]);
+  useEffect(() => { if (hydrated) localStorage.setItem("mentorbridge-data", JSON.stringify({ goals, sessions, communityMentors: mentorList.slice(mentors.length) })); }, [goals, sessions, mentorList, hydrated]);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(""), 3200); return () => clearTimeout(t); }, [toast]);
 
   const go = (p: Page) => { setPage(p); setMobileOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const completed = goals.filter(g => g.done).length;
-  const filteredMentors = useMemo(() => mentors.filter(m => {
+  const filteredMentors = useMemo(() => mentorList.filter(m => {
     const q = search.toLowerCase();
     return (m.name.toLowerCase().includes(q) || m.role.toLowerCase().includes(q) || m.skills.some(s => s.toLowerCase().includes(q))) && (skill === "All skills" || m.skills.includes(skill));
-  }), [search, skill]);
+  }), [search, skill, mentorList]);
+
+  function login(email: string, password: string) {
+    const account = accounts.find(a => a.email.toLowerCase() === email.toLowerCase() && a.password === password);
+    if (!account) return "Email or password is incorrect. Try the demo account or create a new account.";
+    setCurrentUser(account);
+    localStorage.setItem("mentorbridge-auth", JSON.stringify({ accounts, currentUser: account }));
+    return null;
+  }
+  function signup(account: Account) {
+    if (accounts.some(a => a.email.toLowerCase() === account.email.toLowerCase())) return "An account with this email already exists. Please log in instead.";
+    const nextAccounts = [...accounts, account];
+    if (account.account === "mentor") {
+      const newMentor: Mentor = { name: account.name, initials: getInitials(account.name), role: account.title || "Mentor", company: account.company || "MentorBridge", skills: account.skills || ["Career growth"], rating: 5.0, reviews: 0, sessions: 0, color: "violet", bio: account.bio || "", available: true };
+      setMentorList(list => [...list, newMentor]);
+    }
+    setAccounts(nextAccounts); setCurrentUser(account); setPage(account.account === "mentor" ? "Find mentors" : "Overview");
+    localStorage.setItem("mentorbridge-auth", JSON.stringify({ accounts: nextAccounts, currentUser: account }));
+    return null;
+  }
+  function logout() {
+    setCurrentUser(null); setPage("Overview");
+    localStorage.setItem("mentorbridge-auth", JSON.stringify({ accounts, currentUser: null }));
+  }
+
+  if (!hydrated) return <div className="app-loading"><span className="brand-mark"><Sparkles/></span></div>;
+  if (!currentUser) return <Auth onLogin={login} onSignup={signup} />;
+  const userAvatar = { initials: getInitials(currentUser.name), color: "dark" };
 
   function addGoal(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); const form = new FormData(e.currentTarget);
@@ -97,15 +144,15 @@ export default function MentorApp() {
       <nav>{nav.map(item => <button key={item.label} className={`nav-item ${page === item.label ? "active" : ""}`} onClick={() => go(item.label)}><item.icon size={19}/><span>{item.label}</span>{item.label === "Messages" && <i>2</i>}</button>)}</nav>
       <div className="sidebar-spacer" />
       <div className="streak-card"><span><Zap size={17}/></span><strong>Keep the momentum!</strong><p>You’ve made progress for 3 weeks in a row.</p><div className="week">{["M","T","W","T","F","S","S"].map((d,i) => <b className={i < 4 ? "filled" : ""} key={i}>{i < 4 ? <Check size={12}/> : d}</b>)}</div></div>
-      <button className="nav-item settings"><Settings size={19}/>Settings</button>
-      <div className="profile-mini"><Avatar person={{initials:"AR",color:"dark"}} small/><div><strong>Aarav Rao</strong><span>Mentee account</span></div><ChevronDown size={16}/></div>
+      <button className="nav-item settings" onClick={logout}><LogOut size={19}/>Log out</button>
+      <div className="profile-mini"><Avatar person={userAvatar} small/><div><strong>{currentUser.name}</strong><span>{currentUser.account === "mentor" ? "Mentor" : "Mentee"} account</span></div><ChevronDown size={16}/></div>
     </aside>
 
     <main className="main">
-      <header className="topbar"><button className="icon-button menu" onClick={() => setMobileOpen(true)}><Menu/></button><div className="global-search"><Search size={18}/><input placeholder="Search mentors, goals, sessions…" onFocus={() => page !== "Find mentors" && go("Find mentors")} value={search} onChange={e => setSearch(e.target.value)}/><kbd>⌘ K</kbd></div><button className="icon-button notification"><Bell size={20}/><i/></button><Avatar person={{initials:"AR",color:"dark"}} small/></header>
+      <header className="topbar"><button className="icon-button menu" onClick={() => setMobileOpen(true)}><Menu/></button><div className="global-search"><Search size={18}/><input placeholder="Search mentors, goals, sessions…" onFocus={() => page !== "Find mentors" && go("Find mentors")} value={search} onChange={e => setSearch(e.target.value)}/><kbd>⌘ K</kbd></div><button className="icon-button notification"><Bell size={20}/><i/></button><Avatar person={userAvatar} small/></header>
       <div className="content">
         {page === "Overview" && <>
-          <section className="welcome"><div><p className="eyebrow">WEDNESDAY, NOVEMBER 11</p><h1>Good afternoon, Aarav <span>👋</span></h1><p>You’re building something great. Here’s your mentorship at a glance.</p></div><button className="button primary" onClick={() => setModal("session")}><Plus size={18}/>Schedule session</button></section>
+          <section className="welcome"><div><p className="eyebrow">WEDNESDAY, NOVEMBER 11</p><h1>Good afternoon, {currentUser.name.split(" ")[0]} <span>👋</span></h1><p>You’re building something great. Here’s your mentorship at a glance.</p></div><button className="button primary" onClick={() => setModal("session")}><Plus size={18}/>Schedule session</button></section>
           <section className="stats-grid">
             <div className="stat"><span className="stat-icon purple"><Target/></span><div><p>Goals completed</p><h3>{completed}<small> / {goals.length}</small></h3><span className="trend"><TrendingUp/> On track this month</span></div></div>
             <div className="stat"><span className="stat-icon green"><CalendarDays/></span><div><p>Upcoming sessions</p><h3>{sessions.length}<small> scheduled</small></h3><span className="muted">Next one tomorrow</span></div></div>
